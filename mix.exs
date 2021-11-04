@@ -33,6 +33,7 @@ defmodule Astarte.Core.Mixfile do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
+      elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
       dialyzer_cache_directory: dialyzer_cache_directory(Mix.env()),
@@ -55,6 +56,10 @@ defmodule Astarte.Core.Mixfile do
     nil
   end
 
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/astarte_core/generators"]
+  defp elixirc_paths(_), do: ["lib"]
+
   defp deps do
     [
       {:cyanide, github: "ispirata/cyanide"},
@@ -66,7 +71,8 @@ defmodule Astarte.Core.Mixfile do
       {:elixir_uuid, "~> 1.2"},
       {:excoveralls, "~> 0.12", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:dialyzex, github: "Comcast/dialyzex", only: [:dev, :ci]}
+      {:dialyzex, github: "Comcast/dialyzex", only: [:dev, :ci]},
+      {:propcheck, "~> 1.4", only: [:test, :dev]}
     ]
   end
 

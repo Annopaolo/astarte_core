@@ -1,5 +1,6 @@
 defmodule Astarte.Core.MappingTest do
   use ExUnit.Case
+  use PropCheck
 
   alias Astarte.Core.CQLUtils
   alias Astarte.Core.Mapping
@@ -217,6 +218,21 @@ defmodule Astarte.Core.MappingTest do
     }
 
     assert Mapping.from_db_result!(legacy_result) == expected_mapping
+  end
+
+  property "good mapping is good" do
+    alias Astarte.Core.Properties.Generators.MappingGenerator
+
+    forall params <- MappingGenerator.mapping_params() do
+      opts = opts_fixture()
+
+      # IO.inspect(params)
+      # IO.inspect(Mapping.changeset(%Mapping{}, params, opts))
+
+      changeset = Mapping.changeset(%Mapping{}, params, opts)
+
+      changeset.valid?
+    end
   end
 
   defp opts_fixture do
