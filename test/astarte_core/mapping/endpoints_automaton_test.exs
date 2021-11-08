@@ -1,5 +1,8 @@
 defmodule Astarte.Core.Mapping.EndpointsAutomatonTest do
   use ExUnit.Case
+  use PropCheck
+  alias Astarte.Core.Properties.Generators.Interface, as: InterfaceGenerator
+  alias Astarte.Core.Properties.Generators.Mapping, as: MappingGenerator
   alias Astarte.Core.Mapping
   alias Astarte.Core.Mapping.EndpointsAutomaton
   alias Astarte.Core.Interface
@@ -282,6 +285,15 @@ defmodule Astarte.Core.Mapping.EndpointsAutomatonTest do
   test "parametric endpoints overlap even when placeholders have different names" do
     assert {:error, :overlapping_mappings} = EndpointsAutomaton.build(@alias_parametric_overlaps)
   end
+
+  # property "good endpoints good" do
+  #   forall endpoint_mappings <- InterfaceGenerator.just_endpoint_mappings() do
+  #     case EndpointsAutomaton.build(endpoint_mappings) do
+  #       {:ok, _automaton} -> true
+  #       _ -> false
+  #     end
+  #   end
+  # end
 
   test "automaton states depend on both tokens and token position" do
     assert {:ok, automaton} = EndpointsAutomaton.build(@endpoint_similar_tokens)

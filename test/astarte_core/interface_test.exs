@@ -1,9 +1,11 @@
 defmodule Astarte.Core.InterfaceTest do
   use ExUnit.Case
+  use PropCheck
 
   alias Astarte.Core.Interface
   alias Astarte.Core.InterfaceDescriptor
   alias Astarte.Core.Mapping
+  alias Astarte.Core.Properties.Generators.Interface, as: InterfaceGenerator
 
   @aggregated_datastream_interface_json """
   {
@@ -406,6 +408,9 @@ defmodule Astarte.Core.InterfaceTest do
              aggregation: :individual,
              mappings: [%Mapping{}]
            } = interface
+
+    # IO.inspect(interface)
+    # IO.puts("=================================================================")
   end
 
   test "legacy interface" do
@@ -488,6 +493,23 @@ defmodule Astarte.Core.InterfaceTest do
       refute "-" =~ Interface.interface_name_regex()
       refute "." =~ Interface.interface_name_regex()
       refute "-." =~ Interface.interface_name_regex()
+    end
+  end
+
+  # property "interface" do
+  #   forall int <- InterfaceGenerator.interface() do
+  #     IO.inspect(int)
+  #     IO.puts("___________________________________")
+  #     true
+  #   end
+  # end
+
+  property "Interface generator generates valid interfaces" do
+    forall int <- InterfaceGenerator.interface() do
+      params = InterfaceGenerator.interface_to_params(int)
+
+      changeset = Interface.changeset(%Interface{}, params)
+      changeset.valid?
     end
   end
 

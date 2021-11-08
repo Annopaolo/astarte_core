@@ -1,5 +1,6 @@
 defmodule Astarte.Core.SimpleTriggerConfigTest do
   use ExUnit.Case
+  use PropCheck
 
   alias Astarte.Core.CQLUtils
   alias Astarte.Core.Device
@@ -10,6 +11,7 @@ defmodule Astarte.Core.SimpleTriggerConfigTest do
   alias Astarte.Core.Triggers.SimpleTriggersProtobuf.TaggedSimpleTrigger
   alias Astarte.Core.Triggers.SimpleTriggersProtobuf.Utils, as: SimpleTriggersUtils
   alias Ecto.Changeset
+  alias Astarte.Core.Properties.Generators.SimpleTriggerConfigGenerator
 
   @interface_name "com.Test.Interface"
   @interface_major 1
@@ -158,6 +160,18 @@ defmodule Astarte.Core.SimpleTriggerConfigTest do
                known_value: nil
              } = config
     end
+
+    # property "well-formed data triggers do not fail" do
+    #   forall data_trigger_map <- SimpleTriggerConfigGenerator.data_trigger() do
+    #     changeset = SimpleTriggerConfig.changeset(%SimpleTriggerConfig{}, data_trigger_map)
+
+    #     if is_well_formed?(data_trigger_map) do
+    #       changeset.valid?
+    #     else
+    #       not changeset.valid?
+    #     end
+    #   end
+    # end
   end
 
   describe "device triggers" do
@@ -253,6 +267,18 @@ defmodule Astarte.Core.SimpleTriggerConfigTest do
                group_name: ^group_name
              } = config
     end
+
+    # property "well-formed device triggers do not fail" do
+    #   forall device_trigger_map <- SimpleTriggerConfigGenerator.device_trigger() do
+    #     changeset = SimpleTriggerConfig.changeset(%SimpleTriggerConfig{}, device_trigger_map)
+
+    #     if is_well_formed?(device_trigger_map) do
+    #       changeset.valid?
+    #     else
+    #       not changeset.valid?
+    #     end
+    #   end
+    # end
   end
 
   describe "conversion to and from TaggedSimpleTrigger" do
@@ -600,7 +626,31 @@ defmodule Astarte.Core.SimpleTriggerConfigTest do
 
       assert config == SimpleTriggerConfig.from_tagged_simple_trigger(tagged_simple_trigger)
     end
+
+    property "SimpleTriggerConfigGenerator generates valid SimpleTriggerConfig" do
+      forall trigger <- SimpleTriggerConfigGenerator.simple_trigger_config() do
+        trigger_map = SimpleTriggerConfigGenerator.simple_trigger_config_to_params(trigger)
+
+        changeset = SimpleTriggerConfig.changeset(%SimpleTriggerConfig{}, trigger_map)
+        changeset.valid?
+      end
+    end
   end
+
+  #   property "well-formed triggers roundtrip" do
+  #     forall trigger <- SimpleTriggerConfigGenerator.simple_trigger_config() do
+  #       trigger_map = SimpleTriggerConfigGenerator.simple_trigger_config_to_params(trigger)
+
+  #       changeset = SimpleTriggerConfig.changeset(%SimpleTriggerConfig{}, trigger_map)
+
+  #       config = Ecto.Changeset.apply_action!(changeset, :insert)
+
+  #       tagged_simple_trigger = SimpleTriggerConfig.to_tagged_simple_trigger(config)
+
+  #       config == SimpleTriggerConfig.from_tagged_simple_trigger(tagged_simple_trigger)
+  #     end
+  #   end
+  # end
 
   describe "JSON encode" do
     test "data SimpleTriggerConfig is correctly encoded" do
@@ -767,4 +817,32 @@ defmodule Astarte.Core.SimpleTriggerConfigTest do
                })
     end
   end
+
+  # defp is_well_formed?(trigger_map = %{"type" => "data_trigger"}) do
+  #   if (Map.get(trigger_map, "value_match_operator") != "*" and
+  #         Map.get(trigger_map, "known_value") == "") or
+  #        (Map.get(trigger_map, "interface_name") == "*" and
+  #           Map.get(trigger_map, "on") != "incoming_data") or
+  #        (Map.get(trigger_map, "interface_name") != "*" and
+  #           Map.get(trigger_map, "interface_major") == "") or
+  #        (Map.get(trigger_map, "interface_name") == "*" and
+  #           Map.get(trigger_map, "match_path") != "/*") or
+  #        (Map.get(trigger_map, "match_path") == "/*" and
+  #           Map.get(trigger_map, "value_match_operator") != "*") or
+  #        (Map.get(trigger_map, "device_id") != "" and
+  #           Map.get(trigger_map, "group_name") != "") do
+  #     false
+  #   else
+  #     true
+  #   end
+  # end
+
+  # defp is_well_formed?(trigger_map = %{"type" => "device_trigger"}) do
+  #   if Map.get(trigger_map, "device_id") != "" and
+  #        Map.get(trigger_map, "group_name") != "" do
+  #     false
+  #   else
+  #     true
+  #   end
+  # end
 end

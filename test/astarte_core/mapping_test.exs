@@ -220,18 +220,18 @@ defmodule Astarte.Core.MappingTest do
     assert Mapping.from_db_result!(legacy_result) == expected_mapping
   end
 
-  property "good mapping is good" do
-    alias Astarte.Core.Properties.Generators.MappingGenerator
+  property "Mapping generator generates valid mappings" do
+    alias Astarte.Core.Properties.Generators.Mapping, as: MappingGenerator
 
-    forall params <- MappingGenerator.mapping_params() do
-      opts = opts_fixture()
+    forall interface_type <- oneof([:datastream, :properties]) do
+      opts = opts_fixture() ++ [interface_type: interface_type]
 
-      # IO.inspect(params)
-      # IO.inspect(Mapping.changeset(%Mapping{}, params, opts))
+      forall mapping <- MappingGenerator.mapping(opts) do
+        params = MappingGenerator.mapping_to_params(mapping)
+        changeset = Mapping.changeset(%Mapping{}, params, opts)
 
-      changeset = Mapping.changeset(%Mapping{}, params, opts)
-
-      changeset.valid?
+        changeset.valid?
+      end
     end
   end
 
