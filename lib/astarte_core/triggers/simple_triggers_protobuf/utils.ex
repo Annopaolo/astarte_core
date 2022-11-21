@@ -119,7 +119,7 @@ defmodule Astarte.Core.Triggers.SimpleTriggersProtobuf.Utils do
     } = protobuf_data_trigger
 
     %{"v" => plain_value} =
-      if encoded_known_value do
+      if encoded_known_value != "" and encoded_known_value != nil do
         Cyanide.decode!(encoded_known_value)
       else
         %{"v" => nil}
