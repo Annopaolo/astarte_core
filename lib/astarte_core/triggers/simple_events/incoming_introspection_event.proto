@@ -18,6 +18,12 @@
 
 syntax = "proto3";
 
+message InterfaceVersion {
+  int32 major = 1;
+  int32 minor = 2;
+}
+
 message IncomingIntrospectionEvent {
-  optional string introspection = 1;
+  optional string introspection = 1 [deprecated = true];
+  map<string, InterfaceVersion> introspection_map = 2;
 }
